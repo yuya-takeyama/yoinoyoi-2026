@@ -17,11 +17,14 @@ async function main() {
 
   const html = await response.text();
 
+  // Normalize line endings to LF
+  const normalizedHtml = html.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+
   console.log(`Writing to ${OUTPUT_FILE}...`);
   fs.mkdirSync(path.dirname(OUTPUT_FILE), { recursive: true });
-  fs.writeFileSync(OUTPUT_FILE, html, "utf-8");
+  fs.writeFileSync(OUTPUT_FILE, normalizedHtml, "utf-8");
 
-  console.log(`Done! Saved ${html.length} bytes.`);
+  console.log(`Done! Saved ${normalizedHtml.length} bytes.`);
 }
 
 main().catch((error) => {
