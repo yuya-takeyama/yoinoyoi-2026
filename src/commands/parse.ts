@@ -73,16 +73,14 @@ function parseHtml(html: string): Shop[] {
       // Extract sentra set hours from nested div
       const sentraDiv = td.find(".shop_sentr_tz_wrap");
       if (sentraDiv.length > 0) {
-        // Get text after the <br /> in the <p>
+        // Get text after the first <br /> in the <p>
         const sentraText = sentraDiv.find("p").html();
         if (sentraText) {
-          const parts = sentraText.split("<br");
-          if (parts.length > 1) {
-            // Get the part after <br /> and clean it
-            sentraSetHours = parts
-              .slice(1)
-              .join("")
-              .replace(/^\s*\/?\s*>?\s*/, "")
+          // Match everything after the first <br />
+          const match = sentraText.match(/<br\s*\/?>\s*([\s\S]*)/i);
+          if (match) {
+            sentraSetHours = match[1]
+              .replace(/<br\s*\/?>/gi, "\n")
               .replace(/<[^>]*>/g, "")
               .trim();
           }
