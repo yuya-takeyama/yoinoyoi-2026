@@ -5,6 +5,8 @@
   "scripts": {
     "load": "tsx src/commands/load.ts",
     "transform": "tsx src/commands/transform.ts && pnpm run format",
+    "maps:login": "tsx src/commands/maps-login.ts",
+    "maps:add": "tsx src/commands/maps-add.ts",
     "test": "vitest run",
     "test:watch": "vitest watch",
     "lint": "biome lint .",
@@ -20,7 +22,9 @@
     "vitest": "^4.0.18"
   },
   "dependencies": {
+    "@playwright/test": "^1.58.1",
     "cheerio": "^1.0.0",
+    "playwright": "^1.58.1",
     "zod": "^3.24.4"
   }
 }

@@ -8,3 +8,7 @@ dist/
 
 # Plan file
 z/
+
+# Browser automation
+.browser-data/
+output/maps-progress.json
