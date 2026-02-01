@@ -4,9 +4,13 @@ import { load } from "cheerio";
 import { type Shop, type ShopLinks, ShopsSchema } from "../types/shop.js";
 
 const INPUT_FILE = path.resolve(import.meta.dirname, "../../input/shop.html");
-const OUTPUT_FILE = path.resolve(
+const OUTPUT_JSON = path.resolve(
   import.meta.dirname,
   "../../output/shops.json",
+);
+const OUTPUT_CSV = path.resolve(
+  import.meta.dirname,
+  "../../output/shops-for-google-maps.csv",
 );
 
 function parseShopLinks(linkHtml: cheerio.Cheerio<cheerio.Element>): ShopLinks {
@@ -147,6 +151,41 @@ function parseHtml(html: string): Shop[] {
   return shops;
 }
 
+function escapeCsvField(value: string): string {
+  // If value contains comma, double quote, or newline, wrap in quotes and escape quotes
+  if (value.includes(",") || value.includes('"') || value.includes("\n")) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
+
+function generateCsv(shops: Shop[]): string {
+  const headers = ["Name", "Address", "Description", "Website", "Phone"];
+  const rows = shops.map((shop) => {
+    // Prepend 東京都 to address for better geocoding
+    const fullAddress = `東京都${shop.address.replace(/\n/g, " ")}`;
+
+    // Use first available link: website > instagram > x > facebook
+    const website =
+      shop.links.website ||
+      shop.links.instagram ||
+      shop.links.x ||
+      shop.links.facebook ||
+      "";
+
+    // Clean description: replace newlines with spaces, limit length
+    const description = shop.description.replace(/\n+/g, " ").slice(0, 500);
+
+    const phone = shop.tel || "";
+
+    return [shop.name, fullAddress, description, website, phone]
+      .map(escapeCsvField)
+      .join(",");
+  });
+
+  return [headers.join(","), ...rows].join("\n");
+}
+
 function main() {
   console.log("Reading HTML file...");
   const html = fs.readFileSync(INPUT_FILE, "utf-8");
@@ -160,10 +199,15 @@ function main() {
   console.log("Validating with Zod schema...");
   const validated = ShopsSchema.parse(shops);
 
-  // Write output
-  console.log(`Writing to ${OUTPUT_FILE}...`);
-  fs.mkdirSync(path.dirname(OUTPUT_FILE), { recursive: true });
-  fs.writeFileSync(OUTPUT_FILE, JSON.stringify(validated, null, 2), "utf-8");
+  // Write JSON output
+  console.log(`Writing JSON to ${OUTPUT_JSON}...`);
+  fs.mkdirSync(path.dirname(OUTPUT_JSON), { recursive: true });
+  fs.writeFileSync(OUTPUT_JSON, JSON.stringify(validated, null, 2), "utf-8");
+
+  // Write CSV output for Google Maps
+  console.log(`Writing CSV to ${OUTPUT_CSV}...`);
+  const csv = generateCsv(validated);
+  fs.writeFileSync(OUTPUT_CSV, csv, "utf-8");
 
   console.log("Done!");
 }
