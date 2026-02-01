@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { load } from "cheerio";
-import { ShopsSchema, type Shop, type ShopLinks } from "../types/shop.js";
+import { type Shop, type ShopLinks, ShopsSchema } from "../types/shop.js";
 
 const INPUT_FILE = path.resolve(import.meta.dirname, "../../input/shop.html");
 const OUTPUT_FILE = path.resolve(
