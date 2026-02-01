@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "load": "tsx src/commands/load.ts",
     "parse": "tsx src/commands/parse.ts",
     "test": "vitest run",
     "test:watch": "vitest watch",
